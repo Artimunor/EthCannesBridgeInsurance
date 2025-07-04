@@ -1,6 +1,16 @@
 [profile.default]
 src = "src"
 out = "out"
+auto_detect_solc = false
+solc = "0.8.30"
+ffi = true
+ast = true
+viaIR = true
+build_info = true
+extra_output = ["storageLayout"]
+verbosity = 3
+optimizer = true
+optimizer_runs = 20_000
 libs = ["lib"]
 
 remappings = [
@@ -8,3 +18,19 @@ remappings = [
     '@layerzerolabs/lz-evm-protocol-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/protocol',
     '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
 ]
+
+[rpc_endpoints]
+base = "https://mainnet.base.org"
+base-sepolia = "https://sepolia.base.org"
+sepolia = "https://sepolia.infura.io/v3/3a0fa033ac184bd6bdea8aa7d910614f"
+kite-test = "https://rpc-testnet.gokite.ai/"
+celo-alfajores = "https://alfajores-forno.celo-testnet.org"
+celo = "https://forno.celo.org"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}", url = "https://api.etherscan.io/api"  }
+base = { key = "${BASESCAN_API_KEY}", url = "https://api.basescan.org/api" }
+base-sepolia = { key = "${BASESCAN_API_KEY}", url = "https://api-sepolia.basescan.org/api" }
+kite-test = { key = "x", url = "https://testnet.kitescan.ai/" }
+celo-alfajores = { key = "${CELOSCAN_API_KEY}", url = "https://api-alfajores.celoscan.io/api"}
+celo = { key = "${CELOSCAN_API_KEY}", url = "https://api.celoscan.io/api"}
