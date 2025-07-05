@@ -3,7 +3,10 @@ pragma solidity ^0.8.30;
 
 import {SygmaTypes} from "./SygmaTypes.sol";
 import {OAppRead} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppRead.sol";
-import {MessagingFee, MessagingReceipt} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {
+    MessagingFee,
+    MessagingReceipt
+} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import {SygmaState} from "./SygmaState.sol";
 
 import {AddressCast} from "@layerzerolabs/lz-evm-protocol-v2/contracts/libs/AddressCast.sol";
@@ -13,10 +16,7 @@ import {ReadCodecV1, EVMCallRequestV1} from "@layerzerolabs/oapp-evm/contracts/o
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract SygmaValidateSent {
-    function validateSent(
-        bytes32 transactionGuid,
-        SygmaTypes.SygmaInsurance memory insurance
-    ) public {
+    function validateSent(bytes32 transactionGuid, SygmaTypes.SygmaInsurance memory insurance) public {
         // Implement validation logic here
     }
 }

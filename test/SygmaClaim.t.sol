@@ -7,7 +7,9 @@ import {SygmaState} from "../src/SygmaState.sol";
 import {SygmaValidateReceived} from "../src/SygmaValidateReceived.sol";
 
 // OApp imports
-import {IOAppOptionsType3, EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
+import {
+    IOAppOptionsType3, EnforcedOptionParam
+} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee, MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 
@@ -119,13 +121,9 @@ contract SigmaClaimTest is TestHelperOz5 {
      */
     function test_send_read() public {
         // Prepare messaging options
-        bytes memory options = OptionsBuilder
-            .newOptions()
-            .addExecutorLzReadOption(1e8, 32, 0);
+        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReadOption(1e8, 32, 0);
 
-        SygmaTypes.SygmaInsurance memory insurance = sygmaState.getInsurance(
-            0x0
-        );
+        SygmaTypes.SygmaInsurance memory insurance = sygmaState.getInsurance(0x0);
         SygmaTypes.SygmaTransaction memory transaction = insurance.transaction;
 
         // Define the numbers to add

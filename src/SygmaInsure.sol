@@ -24,24 +24,20 @@ contract SygmaInsure {
         address toToken
     ) public {
         // Implement payment logic here, e.g., transfer premium from insuree to contract
-        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes
-            .SygmaTransaction({
-                bridge: bridge,
-                transactionGuid: transactionGuid,
-                fromAddress: insuree,
-                toAddress: toAddress,
-                amount: usdAmount,
-                sourceChain: sourceChain,
-                destinationChain: toChain,
-                fromToken: fromToken,
-                toToken: toToken
-            });
-
-        SygmaTypes.SygmaInsurance memory insurance = SygmaTypes.SygmaInsurance({
-            usdAmount: usdAmount,
-            premium: premium,
-            transaction: transaction
+        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes.SygmaTransaction({
+            bridge: bridge,
+            transactionGuid: transactionGuid,
+            fromAddress: insuree,
+            toAddress: toAddress,
+            amount: usdAmount,
+            sourceChain: sourceChain,
+            destinationChain: toChain,
+            fromToken: fromToken,
+            toToken: toToken
         });
+
+        SygmaTypes.SygmaInsurance memory insurance =
+            SygmaTypes.SygmaInsurance({usdAmount: usdAmount, premium: premium, transaction: transaction});
 
         state.addInsurance(transactionGuid, insurance);
     }

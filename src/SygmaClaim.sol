@@ -2,7 +2,10 @@
 pragma solidity ^0.8.30;
 
 import {OAppRead} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppRead.sol";
-import {MessagingFee, MessagingReceipt} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {
+    MessagingFee,
+    MessagingReceipt
+} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import {AddressCast} from "@layerzerolabs/lz-evm-protocol-v2/contracts/libs/AddressCast.sol";
 import {Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {OAppOptionsType3} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
@@ -24,21 +27,17 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
     // Message type for the read operation.
     uint16 public constant READ_TYPE = 1;
 
-    constructor(
-        address _stateAddress,
-        address _endpoint,
-        address _delegate,
-        uint32 _readChannel
-    ) OAppRead(_endpoint, _delegate) Ownable(_delegate) {
+    constructor(address _stateAddress, address _endpoint, address _delegate, uint32 _readChannel)
+        OAppRead(_endpoint, _delegate)
+        Ownable(_delegate)
+    {
         state = SygmaState(_stateAddress);
         READ_CHANNEL = _readChannel;
         _setPeer(_readChannel, AddressCast.toBytes32(address(this)));
     }
 
     function claim(bytes32 transactionGuid) external payable {
-        SygmaTypes.SygmaInsurance memory insurance = state.getInsurance(
-            transactionGuid
-        );
+        SygmaTypes.SygmaInsurance memory insurance = state.getInsurance(transactionGuid);
         SygmaTypes.SygmaTransaction memory transaction = insurance.transaction;
 
         validateReceive(transaction.destinationChain, transaction);
@@ -51,28 +50,17 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
      *
      * @return fee The estimated messaging fee.
      */
-    function quoteReadFee(
-        bytes32 _transactionGuid
-    ) public view returns (MessagingFee memory fee) {
-        SygmaTypes.SygmaInsurance memory insurance = state.getInsurance(
-            _transactionGuid
-        );
+    function quoteReadFee(bytes32 _transactionGuid) public view returns (MessagingFee memory fee) {
+        SygmaTypes.SygmaInsurance memory insurance = state.getInsurance(_transactionGuid);
         SygmaTypes.SygmaTransaction memory transaction = insurance.transaction;
 
-        address destinationChainReceiverChecker = state.getChainReceiverChecker(
-            transaction.destinationChain
+        address destinationChainReceiverChecker = state.getChainReceiverChecker(transaction.destinationChain);
+        return _quote(
+            READ_CHANNEL,
+            _getCmdValidateReceive(destinationChainReceiverChecker, transaction.destinationChain, transaction),
+            this.combineOptions(READ_CHANNEL, READ_TYPE, new bytes(0)),
+            false
         );
-        return
-            _quote(
-                READ_CHANNEL,
-                _getCmdValidateReceive(
-                    destinationChainReceiverChecker,
-                    transaction.destinationChain,
-                    transaction
-                ),
-                this.combineOptions(READ_CHANNEL, READ_TYPE, new bytes(0)),
-                false
-            );
     }
 
     /**
@@ -84,28 +72,22 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
      *
      * @return receipt The LayerZero messaging receipt for the request.
      */
-    function validateReceive(
-        uint32 _targetEid,
-        SygmaTypes.SygmaTransaction memory _transaction
-    ) public payable returns (MessagingReceipt memory receipt) {
-        address destinationChainReceiverChecker = state.getChainReceiverChecker(
-            _transaction.destinationChain
-        );
+    function validateReceive(uint32 _targetEid, SygmaTypes.SygmaTransaction memory _transaction)
+        public
+        payable
+        returns (MessagingReceipt memory receipt)
+    {
+        address destinationChainReceiverChecker = state.getChainReceiverChecker(_transaction.destinationChain);
 
-        bytes memory cmd = _getCmdValidateReceive(
-            destinationChainReceiverChecker,
-            _targetEid,
-            _transaction
-        );
+        bytes memory cmd = _getCmdValidateReceive(destinationChainReceiverChecker, _targetEid, _transaction);
 
-        return
-            _lzSend(
-                READ_CHANNEL,
-                cmd,
-                this.combineOptions(READ_CHANNEL, READ_TYPE, new bytes(0)),
-                MessagingFee(msg.value, 0),
-                payable(msg.sender)
-            );
+        return _lzSend(
+            READ_CHANNEL,
+            cmd,
+            this.combineOptions(READ_CHANNEL, READ_TYPE, new bytes(0)),
+            MessagingFee(msg.value, 0),
+            payable(msg.sender)
+        );
     }
 
     /**
@@ -126,10 +108,7 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
         // 1. Define WHAT function to call on the target contract
         //    Using the interface selector ensures type safety and correctness
         //    You can replace this with any public/external function or state variable
-        bytes memory callData = abi.encodeWithSelector(
-            ISygmaValidateReceived.validateReceived.selector,
-            transaction
-        );
+        bytes memory callData = abi.encodeWithSelector(ISygmaValidateReceived.validateReceived.selector, transaction);
 
         // 2. Build the read request specifying WHERE and HOW to fetch the data
         EVMCallRequestV1[] memory readRequests = new EVMCallRequestV1[](1);
@@ -160,10 +139,10 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
      * @dev   _extraData Additional data from the Executor (unused here)
      */
     function _lzReceive(
-        Origin calldata /*_origin*/,
-        bytes32 /*_guid*/,
+        Origin calldata, /*_origin*/
+        bytes32, /*_guid*/
         bytes calldata _message,
-        address /*_executor*/,
+        address, /*_executor*/
         bytes calldata /*_extraData*/
     ) internal override {
         // 1. Decode the returned data from bytes to uint256
@@ -184,14 +163,8 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
      * @param _channelId The channel ID to set.
      * @param _active Flag to activate or deactivate the channel.
      */
-    function setReadChannel(
-        uint32 _channelId,
-        bool _active
-    ) public override onlyOwner {
-        _setPeer(
-            _channelId,
-            _active ? AddressCast.toBytes32(address(this)) : bytes32(0)
-        );
+    function setReadChannel(uint32 _channelId, bool _active) public override onlyOwner {
+        _setPeer(_channelId, _active ? AddressCast.toBytes32(address(this)) : bytes32(0));
         READ_CHANNEL = _channelId;
     }
 }

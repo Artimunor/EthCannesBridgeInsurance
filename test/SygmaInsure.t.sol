@@ -10,17 +10,12 @@ contract SygmaInsureTest is Test {
     SygmaInsure public insure;
     SygmaState public state;
 
-    address public mockInsuree =
-        address(0x1111111111111111111111111111111111111111);
-    address public mockToAddress =
-        address(0x2222222222222222222222222222222222222222);
-    address public mockFromToken =
-        address(0x3333333333333333333333333333333333333333);
-    address public mockToToken =
-        address(0x4444444444444444444444444444444444444444);
+    address public mockInsuree = address(0x1111111111111111111111111111111111111111);
+    address public mockToAddress = address(0x2222222222222222222222222222222222222222);
+    address public mockFromToken = address(0x3333333333333333333333333333333333333333);
+    address public mockToToken = address(0x4444444444444444444444444444444444444444);
 
-    bytes32 public constant MOCK_TRANSACTION_GUID =
-        keccak256("test_transaction");
+    bytes32 public constant MOCK_TRANSACTION_GUID = keccak256("test_transaction");
     uint256 public constant MOCK_USD_AMOUNT = 1000e18; // 1000 USD
     uint256 public constant MOCK_PREMIUM = 10e18; // 10 USD premium
     string public constant MOCK_BRIDGE = "LayerZero";
@@ -55,17 +50,12 @@ contract SygmaInsureTest is Test {
         );
 
         // Verify insurance was stored in state
-        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(
-            MOCK_TRANSACTION_GUID
-        );
+        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(MOCK_TRANSACTION_GUID);
 
         assertEq(storedInsurance.usdAmount, MOCK_USD_AMOUNT);
         assertEq(storedInsurance.premium, MOCK_PREMIUM);
         assertEq(storedInsurance.transaction.bridge, MOCK_BRIDGE);
-        assertEq(
-            storedInsurance.transaction.transactionGuid,
-            MOCK_TRANSACTION_GUID
-        );
+        assertEq(storedInsurance.transaction.transactionGuid, MOCK_TRANSACTION_GUID);
         assertEq(storedInsurance.transaction.fromAddress, mockInsuree);
         assertEq(storedInsurance.transaction.toAddress, mockToAddress);
         assertEq(storedInsurance.transaction.amount, MOCK_USD_AMOUNT);
@@ -82,13 +72,9 @@ contract SygmaInsureTest is Test {
         string memory bridge2 = "Wormhole";
         address insuree2 = address(0x5555555555555555555555555555555555555555);
         uint16 sourceChain2 = 56; // BSC
-        address toAddress2 = address(
-            0x6666666666666666666666666666666666666666
-        );
+        address toAddress2 = address(0x6666666666666666666666666666666666666666);
         uint16 toChain2 = 43114; // Avalanche
-        address fromToken2 = address(
-            0x7777777777777777777777777777777777777777
-        );
+        address fromToken2 = address(0x7777777777777777777777777777777777777777);
         address toToken2 = address(0x8888888888888888888888888888888888888888);
 
         insure.insure(
@@ -104,9 +90,7 @@ contract SygmaInsureTest is Test {
             toToken2
         );
 
-        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(
-            transactionGuid2
-        );
+        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(transactionGuid2);
 
         assertEq(storedInsurance.usdAmount, usdAmount2);
         assertEq(storedInsurance.premium, premium2);
@@ -128,43 +112,14 @@ contract SygmaInsureTest is Test {
 
         // Create multiple insurance policies
         insure.insure(
-            guid1,
-            1000e18,
-            10e18,
-            "LayerZero",
-            mockInsuree,
-            1,
-            mockToAddress,
-            137,
-            mockFromToken,
-            mockToToken
+            guid1, 1000e18, 10e18, "LayerZero", mockInsuree, 1, mockToAddress, 137, mockFromToken, mockToToken
         );
 
         insure.insure(
-            guid2,
-            2000e18,
-            20e18,
-            "Wormhole",
-            mockInsuree,
-            56,
-            mockToAddress,
-            43114,
-            mockFromToken,
-            mockToToken
+            guid2, 2000e18, 20e18, "Wormhole", mockInsuree, 56, mockToAddress, 43114, mockFromToken, mockToToken
         );
 
-        insure.insure(
-            guid3,
-            3000e18,
-            30e18,
-            "Axelar",
-            mockInsuree,
-            250,
-            mockToAddress,
-            10,
-            mockFromToken,
-            mockToToken
-        );
+        insure.insure(guid3, 3000e18, 30e18, "Axelar", mockInsuree, 250, mockToAddress, 10, mockFromToken, mockToToken);
 
         // Verify all three insurances are stored correctly
         SygmaTypes.SygmaInsurance memory insurance1 = state.getInsurance(guid1);
@@ -200,9 +155,7 @@ contract SygmaInsureTest is Test {
             address(0)
         );
 
-        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(
-            zeroGuid
-        );
+        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(zeroGuid);
 
         assertEq(storedInsurance.usdAmount, 0);
         assertEq(storedInsurance.premium, 0);
@@ -248,9 +201,7 @@ contract SygmaInsureTest is Test {
             mockToToken
         );
 
-        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(
-            MOCK_TRANSACTION_GUID
-        );
+        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(MOCK_TRANSACTION_GUID);
 
         // Should have new values
         assertEq(storedInsurance.usdAmount, newUsdAmount);
@@ -277,9 +228,7 @@ contract SygmaInsureTest is Test {
             mockToToken
         );
 
-        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(
-            largeGuid
-        );
+        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(largeGuid);
 
         assertEq(storedInsurance.usdAmount, largeUsdAmount);
         assertEq(storedInsurance.premium, largePremium);
@@ -303,9 +252,7 @@ contract SygmaInsureTest is Test {
             mockToToken
         );
 
-        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(
-            emptyBridgeGuid
-        );
+        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(emptyBridgeGuid);
 
         assertEq(storedInsurance.transaction.bridge, "");
         assertEq(storedInsurance.usdAmount, MOCK_USD_AMOUNT);
@@ -332,9 +279,7 @@ contract SygmaInsureTest is Test {
         );
 
         // Verify the data was stored
-        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(
-            MOCK_TRANSACTION_GUID
-        );
+        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(MOCK_TRANSACTION_GUID);
         assertEq(storedInsurance.usdAmount, MOCK_USD_AMOUNT);
     }
 
@@ -348,9 +293,7 @@ contract SygmaInsureTest is Test {
         address fromToken,
         address toToken
     ) public {
-        bytes32 randomGuid = keccak256(
-            abi.encodePacked(block.timestamp, msg.sender, usdAmount)
-        );
+        bytes32 randomGuid = keccak256(abi.encodePacked(block.timestamp, msg.sender, usdAmount));
 
         insure.insure(
             randomGuid,
@@ -365,19 +308,14 @@ contract SygmaInsureTest is Test {
             toToken
         );
 
-        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(
-            randomGuid
-        );
+        SygmaTypes.SygmaInsurance memory storedInsurance = state.getInsurance(randomGuid);
 
         assertEq(storedInsurance.usdAmount, usdAmount);
         assertEq(storedInsurance.premium, premium);
         assertEq(storedInsurance.transaction.fromAddress, insuree);
         assertEq(storedInsurance.transaction.toAddress, toAddress);
         assertEq(storedInsurance.transaction.sourceChain, sourceChain);
-        assertEq(
-            storedInsurance.transaction.destinationChain,
-            destinationChain
-        );
+        assertEq(storedInsurance.transaction.destinationChain, destinationChain);
         assertEq(storedInsurance.transaction.fromToken, fromToken);
         assertEq(storedInsurance.transaction.toToken, toToken);
     }

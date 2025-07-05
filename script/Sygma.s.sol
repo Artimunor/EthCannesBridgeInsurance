@@ -16,6 +16,7 @@ import {SygmaState} from "../src/SygmaState.sol";
 
 contract SygmaScript is Script {
     using OptionsBuilder for bytes;
+
     SygmaInsure public insure;
     SygmaClaim public sygmaClaim;
     SygmaValidateReceived public sygmaValidateReceived;
@@ -72,12 +73,7 @@ contract SygmaScript is Script {
 
         insure = new SygmaInsure(address(sygmaState));
 
-        sygmaClaim = new SygmaClaim(
-            address(sygmaState),
-            endpoint,
-            owner,
-            READ_CHANNEL
-        );
+        sygmaClaim = new SygmaClaim(address(sygmaState), endpoint, owner, READ_CHANNEL);
 
         sygmaValidateReceived = new SygmaValidateReceived();
 
