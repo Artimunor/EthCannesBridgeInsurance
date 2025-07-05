@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {SygmaTypes} from "./SygmaTypes.sol";
 import {OAppRead} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppRead.sol";
 import {MessagingFee, MessagingReceipt} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-import {SygmaState} from "./SygmaState.sol";
-
 import {AddressCast} from "@layerzerolabs/lz-evm-protocol-v2/contracts/libs/AddressCast.sol";
 import {Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {OAppOptionsType3} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {ReadCodecV1, EVMCallRequestV1} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/ReadCodecV1.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+import {SygmaState} from "./SygmaState.sol";
+import {SygmaTypes} from "./SygmaTypes.sol";
 import {ISygmaValidateReceived} from "./interface/ISygmaValidateReceived.sol";
 
 contract SygmaClaim is OAppRead, OAppOptionsType3 {
@@ -18,10 +18,10 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
 
     event DataReceived(uint256 data);
 
-    /// @notice LayerZero read channel ID.
+    // LayerZero read channel ID.
     uint32 public READ_CHANNEL;
 
-    /// @notice Message type for the read operation.
+    // Message type for the read operation.
     uint16 public constant READ_TYPE = 1;
 
     constructor(
@@ -41,11 +41,15 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
         );
         SygmaTypes.SygmaTransaction memory transaction = insurance.transaction;
 
+        address destinationChainReceiverChecker = state.getChainReceiverChecker(
+            transaction.destinationChain
+        );
+
         // Implement claim logic here
-        validateReceive(
-            address(insurance),
-            insurance.endpointId,
-            "",
+        this.validateReceive(
+            destinationChainReceiverChecker,
+            transaction.destinationChain,
+            new bytes(0),
             transaction
         );
     }
@@ -94,7 +98,7 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
         uint32 _targetEid,
         bytes calldata _extraOptions,
         SygmaTypes.SygmaTransaction memory _transaction
-    ) private payable returns (MessagingReceipt memory receipt) {
+    ) public payable returns (MessagingReceipt memory receipt) {
         // 1. Build the read command for the target contract and function
         bytes memory cmd = _getCmdValidateReceive(
             _targetContractAddress,
