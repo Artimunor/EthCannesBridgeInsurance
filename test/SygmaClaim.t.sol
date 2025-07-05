@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import {SigmaClaim} from "../src/SigmaClaim.sol";
-import {SigmaValidateReceive} from "../src/SigmaValidateReceive.sol";
+import {SygmaClaim} from "../src/SygmaClaim.sol";
+import {SygmaValidateReceive} from "../src/SygmaValidateReceive.sol";
 
 // OApp imports
 import {IOAppOptionsType3, EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
