@@ -5,14 +5,10 @@ import {SygmaTypes} from "../SygmaTypes.sol";
 
 interface ISygmaValidateReceived {
     // Main validation function
-    function validateReceived(
-        SygmaTypes.SygmaTransaction memory transaction
-    ) external returns (uint256);
+    function validateReceived(SygmaTypes.SygmaTransaction memory transaction) external returns (uint256);
 
     // Enhanced validation with detailed results
-    function validateReceivedDetailed(
-        SygmaTypes.SygmaTransaction memory transaction
-    )
+    function validateReceivedDetailed(SygmaTypes.SygmaTransaction memory transaction)
         external
         view
         returns (
@@ -27,17 +23,11 @@ interface ISygmaValidateReceived {
         );
 
     // Transaction status functions
-    function isTransactionReceived(
-        bytes32 transactionGuid
-    ) external view returns (bool);
+    function isTransactionReceived(bytes32 transactionGuid) external view returns (bool);
 
-    function isTransactionValidated(
-        bytes32 transactionGuid
-    ) external view returns (bool);
+    function isTransactionValidated(bytes32 transactionGuid) external view returns (bool);
 
-    function isTransactionClaimed(
-        bytes32 transactionGuid
-    ) external view returns (bool);
+    function isTransactionClaimed(bytes32 transactionGuid) external view returns (bool);
 
     // Admin functions
     function registerReceivedTransaction(
@@ -51,9 +41,7 @@ interface ISygmaValidateReceived {
     function markTransactionClaimed(bytes32 transactionGuid) external;
 
     // Utility functions
-    function getValidationResultDescription(
-        uint256 result
-    ) external pure returns (string memory);
+    function getValidationResultDescription(uint256 result) external pure returns (string memory);
 
     // Events
     event TransactionReceived(
@@ -65,9 +53,5 @@ interface ISygmaValidateReceived {
         uint256 timestamp
     );
 
-    event TransactionValidated(
-        bytes32 indexed transactionGuid,
-        bool isValid,
-        uint256 timestamp
-    );
+    event TransactionValidated(bytes32 indexed transactionGuid, bool isValid, uint256 timestamp);
 }

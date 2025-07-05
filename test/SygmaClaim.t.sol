@@ -7,7 +7,9 @@ import {SygmaState} from "../src/SygmaState.sol";
 import {SygmaValidateReceived} from "../src/SygmaValidateReceived.sol";
 
 // OApp imports
-import {IOAppOptionsType3, EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
+import {
+    IOAppOptionsType3, EnforcedOptionParam
+} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {MessagingFee, MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 
@@ -90,18 +92,11 @@ contract SigmaClaimTest is TestHelperOz5 {
         );
 
         // Set up options for the SygmaClaim contract
-        bytes memory options = OptionsBuilder
-            .newOptions()
-            .addExecutorLzReadOption(300000, 32, 0);
+        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReadOption(300000, 32, 0);
 
         // Set enforced options for the read channel
-        EnforcedOptionParam[]
-            memory enforcedOptions = new EnforcedOptionParam[](1);
-        enforcedOptions[0] = EnforcedOptionParam({
-            eid: DEFAULT_CHANNEL_ID,
-            msgType: READ_TYPE,
-            options: options
-        });
+        EnforcedOptionParam[] memory enforcedOptions = new EnforcedOptionParam[](1);
+        enforcedOptions[0] = EnforcedOptionParam({eid: DEFAULT_CHANNEL_ID, msgType: READ_TYPE, options: options});
 
         sygmaClaim.setEnforcedOptions(enforcedOptions);
 
@@ -137,33 +132,26 @@ contract SigmaClaimTest is TestHelperOz5 {
         bytes32 id = bytes32(uint256(2));
 
         // Create a minimal insurance to avoid the default 0 destinationChain
-        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes
-            .SygmaTransaction({
-                bridge: "",
-                transactionGuid: bytes32(0),
-                fromAddress: address(0),
-                toAddress: address(0),
-                amount: 0,
-                sourceChain: 0,
-                destinationChain: uint16(aEid), // Use aEid instead of 0
-                fromToken: address(0),
-                toToken: address(0)
-            });
-
-        SygmaTypes.SygmaInsurance memory insurance = SygmaTypes.SygmaInsurance({
-            usdAmount: 0,
-            premium: 0,
-            transaction: transaction
+        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes.SygmaTransaction({
+            bridge: "",
+            transactionGuid: bytes32(0),
+            fromAddress: address(0),
+            toAddress: address(0),
+            amount: 0,
+            sourceChain: 0,
+            destinationChain: uint16(aEid), // Use aEid instead of 0
+            fromToken: address(0),
+            toToken: address(0)
         });
+
+        SygmaTypes.SygmaInsurance memory insurance =
+            SygmaTypes.SygmaInsurance({usdAmount: 0, premium: 0, transaction: transaction});
 
         // Add minimal insurance
         sygmaState.addInsurance(id, insurance);
 
         // Set up chain receiver checker
-        sygmaState.setChainReceiverChecker(
-            aEid,
-            address(sygmaValidateReceived)
-        );
+        sygmaState.setChainReceiverChecker(aEid, address(sygmaValidateReceived));
 
         // Estimate the fee
         MessagingFee memory fee = sygmaClaim.quoteReadFee(id);
@@ -197,11 +185,7 @@ contract SigmaClaimTest is TestHelperOz5 {
             }
         }
         assertEq(found, true, "DataReceived event not emitted");
-        assertEq(
-            dataReceived,
-            5,
-            "Data received does not match expected value"
-        );
+        assertEq(dataReceived, 5, "Data received does not match expected value");
     }
 
     /**
@@ -215,34 +199,27 @@ contract SigmaClaimTest is TestHelperOz5 {
         bytes32 transactionGuid = keccak256("test_claim_transaction");
 
         // Create a transaction struct
-        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes
-            .SygmaTransaction({
-                bridge: "LayerZero",
-                transactionGuid: transactionGuid,
-                fromAddress: userA,
-                toAddress: address(0x2222222222222222222222222222222222222222),
-                amount: 1000e18,
-                sourceChain: 1, // Ethereum
-                destinationChain: uint16(aEid), // Chain A where validator is deployed
-                fromToken: address(0x3333333333333333333333333333333333333333),
-                toToken: address(0x4444444444444444444444444444444444444444)
-            });
+        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes.SygmaTransaction({
+            bridge: "LayerZero",
+            transactionGuid: transactionGuid,
+            fromAddress: userA,
+            toAddress: address(0x2222222222222222222222222222222222222222),
+            amount: 1000e18,
+            sourceChain: 1, // Ethereum
+            destinationChain: uint16(aEid), // Chain A where validator is deployed
+            fromToken: address(0x3333333333333333333333333333333333333333),
+            toToken: address(0x4444444444444444444444444444444444444444)
+        });
 
         // Create insurance struct
-        SygmaTypes.SygmaInsurance memory insurance = SygmaTypes.SygmaInsurance({
-            usdAmount: 1000e18,
-            premium: 10e18,
-            transaction: transaction
-        });
+        SygmaTypes.SygmaInsurance memory insurance =
+            SygmaTypes.SygmaInsurance({usdAmount: 1000e18, premium: 10e18, transaction: transaction});
 
         // Add insurance to state
         sygmaState.addInsurance(transactionGuid, insurance);
 
         // Step 2: Set up chain receiver checker for the destination chain
-        sygmaState.setChainReceiverChecker(
-            uint32(aEid),
-            address(sygmaValidateReceived)
-        );
+        sygmaState.setChainReceiverChecker(uint32(aEid), address(sygmaValidateReceived));
 
         // Step 3: Estimate fee for the claim
         MessagingFee memory fee = sygmaClaim.quoteReadFee(transactionGuid);
@@ -262,13 +239,7 @@ contract SigmaClaimTest is TestHelperOz5 {
         // Mock that validation returns true (1)
         uint256 validationResult = 1;
 
-        this.verifyPackets(
-            bEid,
-            addressToBytes32(address(sygmaClaim)),
-            0,
-            address(0x0),
-            abi.encode(validationResult)
-        );
+        this.verifyPackets(bEid, addressToBytes32(address(sygmaClaim)), 0, address(0x0), abi.encode(validationResult));
 
         // Step 8: Verify the DataReceived event was emitted
         Vm.Log[] memory entries = vm.getRecordedLogs();
@@ -285,11 +256,7 @@ contract SigmaClaimTest is TestHelperOz5 {
         }
 
         assertTrue(dataReceivedFound, "DataReceived event should be emitted");
-        assertEq(
-            receivedData,
-            validationResult,
-            "Received data should match validation result"
-        );
+        assertEq(receivedData, validationResult, "Received data should match validation result");
     }
 
     /**
@@ -302,31 +269,24 @@ contract SigmaClaimTest is TestHelperOz5 {
         bytes32 nonExistentGuid = keccak256("non_existent_transaction");
 
         // Set up a default chain receiver checker for aEid instead of 0
-        sygmaState.setChainReceiverChecker(
-            aEid,
-            address(sygmaValidateReceived)
-        );
+        sygmaState.setChainReceiverChecker(aEid, address(sygmaValidateReceived));
 
         // Since the insurance doesn't exist, the transaction will have destinationChain: 0
         // But we'll create a minimal insurance for testing purposes
-        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes
-            .SygmaTransaction({
-                bridge: "",
-                transactionGuid: bytes32(0),
-                fromAddress: address(0),
-                toAddress: address(0),
-                amount: 0,
-                sourceChain: 0,
-                destinationChain: uint16(aEid), // Use aEid instead of 0
-                fromToken: address(0),
-                toToken: address(0)
-            });
-
-        SygmaTypes.SygmaInsurance memory insurance = SygmaTypes.SygmaInsurance({
-            usdAmount: 0,
-            premium: 0,
-            transaction: transaction
+        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes.SygmaTransaction({
+            bridge: "",
+            transactionGuid: bytes32(0),
+            fromAddress: address(0),
+            toAddress: address(0),
+            amount: 0,
+            sourceChain: 0,
+            destinationChain: uint16(aEid), // Use aEid instead of 0
+            fromToken: address(0),
+            toToken: address(0)
         });
+
+        SygmaTypes.SygmaInsurance memory insurance =
+            SygmaTypes.SygmaInsurance({usdAmount: 0, premium: 0, transaction: transaction});
 
         // Add minimal insurance to avoid the default 0 destinationChain
         sygmaState.addInsurance(nonExistentGuid, insurance);
@@ -351,31 +311,24 @@ contract SigmaClaimTest is TestHelperOz5 {
         bytes32 transactionGuid = keccak256("fee_test_transaction");
 
         // Create insurance with specific destination chain
-        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes
-            .SygmaTransaction({
-                bridge: "Wormhole",
-                transactionGuid: transactionGuid,
-                fromAddress: userA,
-                toAddress: address(0x5555555555555555555555555555555555555555),
-                amount: 2000e18,
-                sourceChain: 56, // BSC
-                destinationChain: uint16(aEid),
-                fromToken: address(0x6666666666666666666666666666666666666666),
-                toToken: address(0x7777777777777777777777777777777777777777)
-            });
-
-        SygmaTypes.SygmaInsurance memory insurance = SygmaTypes.SygmaInsurance({
-            usdAmount: 2000e18,
-            premium: 20e18,
-            transaction: transaction
+        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes.SygmaTransaction({
+            bridge: "Wormhole",
+            transactionGuid: transactionGuid,
+            fromAddress: userA,
+            toAddress: address(0x5555555555555555555555555555555555555555),
+            amount: 2000e18,
+            sourceChain: 56, // BSC
+            destinationChain: uint16(aEid),
+            fromToken: address(0x6666666666666666666666666666666666666666),
+            toToken: address(0x7777777777777777777777777777777777777777)
         });
+
+        SygmaTypes.SygmaInsurance memory insurance =
+            SygmaTypes.SygmaInsurance({usdAmount: 2000e18, premium: 20e18, transaction: transaction});
 
         // Add insurance and set chain receiver checker
         sygmaState.addInsurance(transactionGuid, insurance);
-        sygmaState.setChainReceiverChecker(
-            uint32(aEid),
-            address(sygmaValidateReceived)
-        );
+        sygmaState.setChainReceiverChecker(uint32(aEid), address(sygmaValidateReceived));
 
         // Test fee estimation
         MessagingFee memory fee = sygmaClaim.quoteReadFee(transactionGuid);
@@ -391,41 +344,29 @@ contract SigmaClaimTest is TestHelperOz5 {
      */
     function test_validateReceive() public {
         // Create a transaction
-        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes
-            .SygmaTransaction({
-                bridge: "Axelar",
-                transactionGuid: keccak256("direct_validate_test"),
-                fromAddress: userA,
-                toAddress: address(0x8888888888888888888888888888888888888888),
-                amount: 500e18,
-                sourceChain: 250, // Fantom
-                destinationChain: uint16(aEid),
-                fromToken: address(0x9999999999999999999999999999999999999999),
-                toToken: address(0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA)
-            });
+        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes.SygmaTransaction({
+            bridge: "Axelar",
+            transactionGuid: keccak256("direct_validate_test"),
+            fromAddress: userA,
+            toAddress: address(0x8888888888888888888888888888888888888888),
+            amount: 500e18,
+            sourceChain: 250, // Fantom
+            destinationChain: uint16(aEid),
+            fromToken: address(0x9999999999999999999999999999999999999999),
+            toToken: address(0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA)
+        });
 
         // Set chain receiver checker
-        sygmaState.setChainReceiverChecker(
-            uint32(aEid),
-            address(sygmaValidateReceived)
-        );
+        sygmaState.setChainReceiverChecker(uint32(aEid), address(sygmaValidateReceived));
 
         // Call validateReceive directly
         vm.prank(userA);
         vm.deal(userA, 1 ether);
-        MessagingReceipt memory receipt = sygmaClaim.validateReceive{
-            value: 0.1 ether
-        }(uint32(aEid), transaction);
+        MessagingReceipt memory receipt = sygmaClaim.validateReceive{value: 0.1 ether}(uint32(aEid), transaction);
 
         // Verify receipt
-        assertTrue(
-            receipt.guid != bytes32(0),
-            "ValidateReceive should generate a valid receipt"
-        );
-        assertTrue(
-            receipt.nonce > 0,
-            "ValidateReceive should generate a valid nonce"
-        );
+        assertTrue(receipt.guid != bytes32(0), "ValidateReceive should generate a valid receipt");
+        assertTrue(receipt.nonce > 0, "ValidateReceive should generate a valid nonce");
     }
 
     /**
@@ -438,11 +379,7 @@ contract SigmaClaimTest is TestHelperOz5 {
 
         // Owner should be able to set read channel
         sygmaClaim.setReadChannel(newChannelId, true);
-        assertEq(
-            sygmaClaim.READ_CHANNEL(),
-            newChannelId,
-            "READ_CHANNEL should be updated"
-        );
+        assertEq(sygmaClaim.READ_CHANNEL(), newChannelId, "READ_CHANNEL should be updated");
 
         // Non-owner should not be able to set read channel
         vm.prank(userA);
@@ -459,46 +396,35 @@ contract SigmaClaimTest is TestHelperOz5 {
         // Create a sample insurance policy
         bytes32 transactionGuid = keccak256("basic_test_transaction");
 
-        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes
-            .SygmaTransaction({
-                bridge: "LayerZero",
-                transactionGuid: transactionGuid,
-                fromAddress: userA,
-                toAddress: address(0x2222222222222222222222222222222222222222),
-                amount: 1000e18,
-                sourceChain: 1,
-                destinationChain: uint16(aEid),
-                fromToken: address(0x3333333333333333333333333333333333333333),
-                toToken: address(0x4444444444444444444444444444444444444444)
-            });
-
-        SygmaTypes.SygmaInsurance memory insurance = SygmaTypes.SygmaInsurance({
-            usdAmount: 1000e18,
-            premium: 10e18,
-            transaction: transaction
+        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes.SygmaTransaction({
+            bridge: "LayerZero",
+            transactionGuid: transactionGuid,
+            fromAddress: userA,
+            toAddress: address(0x2222222222222222222222222222222222222222),
+            amount: 1000e18,
+            sourceChain: 1,
+            destinationChain: uint16(aEid),
+            fromToken: address(0x3333333333333333333333333333333333333333),
+            toToken: address(0x4444444444444444444444444444444444444444)
         });
+
+        SygmaTypes.SygmaInsurance memory insurance =
+            SygmaTypes.SygmaInsurance({usdAmount: 1000e18, premium: 10e18, transaction: transaction});
 
         // Add insurance to state
         sygmaState.addInsurance(transactionGuid, insurance);
 
         // Set up chain receiver checker
-        sygmaState.setChainReceiverChecker(
-            uint32(aEid),
-            address(sygmaValidateReceived)
-        );
+        sygmaState.setChainReceiverChecker(uint32(aEid), address(sygmaValidateReceived));
 
         // Verify the insurance was stored correctly
-        SygmaTypes.SygmaInsurance memory storedInsurance = sygmaState
-            .getInsurance(transactionGuid);
+        SygmaTypes.SygmaInsurance memory storedInsurance = sygmaState.getInsurance(transactionGuid);
         assertEq(storedInsurance.usdAmount, 1000e18);
         assertEq(storedInsurance.premium, 10e18);
         assertEq(storedInsurance.transaction.bridge, "LayerZero");
 
         // Verify the chain receiver checker was set
-        assertEq(
-            sygmaState.getChainReceiverChecker(uint32(aEid)),
-            address(sygmaValidateReceived)
-        );
+        assertEq(sygmaState.getChainReceiverChecker(uint32(aEid)), address(sygmaValidateReceived));
 
         // Verify the SygmaClaim contract has the correct state reference
         assertEq(address(sygmaClaim.state()), address(sygmaState));

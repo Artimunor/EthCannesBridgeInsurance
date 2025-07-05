@@ -3,7 +3,10 @@ pragma solidity ^0.8.30;
 
 import {SygmaTypes} from "./SygmaTypes.sol";
 import {OAppRead} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppRead.sol";
-import {MessagingFee, MessagingReceipt} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {
+    MessagingFee,
+    MessagingReceipt
+} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import {SygmaState} from "./SygmaState.sol";
 
 import {AddressCast} from "@layerzerolabs/lz-evm-protocol-v2/contracts/libs/AddressCast.sol";
@@ -24,11 +27,7 @@ contract SygmaValidateReceived is Ownable {
         uint256 timestamp
     );
 
-    event TransactionValidated(
-        bytes32 indexed transactionGuid,
-        bool isValid,
-        uint256 timestamp
-    );
+    event TransactionValidated(bytes32 indexed transactionGuid, bool isValid, uint256 timestamp);
 
     // Validation result codes
     uint256 public constant VALIDATION_SUCCESS = 1;
@@ -78,10 +77,7 @@ contract SygmaValidateReceived is Ownable {
         minimumAmount = _amount;
     }
 
-    function setAuthorizedBridge(
-        address _bridge,
-        bool _authorized
-    ) external onlyOwner {
+    function setAuthorizedBridge(address _bridge, bool _authorized) external onlyOwner {
         authorizedBridges[_bridge] = _authorized;
     }
 
@@ -93,14 +89,8 @@ contract SygmaValidateReceived is Ownable {
         address token,
         uint16 sourceChain
     ) external {
-        require(
-            authorizedBridges[msg.sender],
-            "SygmaValidateReceived: Unauthorized bridge"
-        );
-        require(
-            !receivedTransactions[transactionGuid].exists,
-            "SygmaValidateReceived: Transaction already registered"
-        );
+        require(authorizedBridges[msg.sender], "SygmaValidateReceived: Unauthorized bridge");
+        require(!receivedTransactions[transactionGuid].exists, "SygmaValidateReceived: Transaction already registered");
 
         receivedTransactions[transactionGuid] = ReceivedTransaction({
             transactionGuid: transactionGuid,
@@ -113,41 +103,24 @@ contract SygmaValidateReceived is Ownable {
             isClaimed: false
         });
 
-        emit TransactionReceived(
-            transactionGuid,
-            recipient,
-            amount,
-            token,
-            sourceChain,
-            block.timestamp
-        );
+        emit TransactionReceived(transactionGuid, recipient, amount, token, sourceChain, block.timestamp);
     }
 
     // Function to mark a transaction as claimed
     function markTransactionClaimed(bytes32 transactionGuid) external {
-        require(
-            authorizedBridges[msg.sender],
-            "SygmaValidateReceived: Unauthorized bridge"
-        );
-        require(
-            receivedTransactions[transactionGuid].exists,
-            "SygmaValidateReceived: Transaction not found"
-        );
+        require(authorizedBridges[msg.sender], "SygmaValidateReceived: Unauthorized bridge");
+        require(receivedTransactions[transactionGuid].exists, "SygmaValidateReceived: Transaction not found");
 
         receivedTransactions[transactionGuid].isClaimed = true;
         claimedTransactions[transactionGuid] = true;
     }
 
     // Main validation function - checks if a bridging transaction was actually received
-    function validateReceived(
-        SygmaTypes.SygmaTransaction memory transaction
-    ) public returns (uint256) {
+    function validateReceived(SygmaTypes.SygmaTransaction memory transaction) public returns (uint256) {
         bytes32 transactionGuid = transaction.transactionGuid;
 
         // Check if transaction exists in our records
-        ReceivedTransaction memory receivedTx = receivedTransactions[
-            transactionGuid
-        ];
+        ReceivedTransaction memory receivedTx = receivedTransactions[transactionGuid];
         if (!receivedTx.exists) {
             emit TransactionValidated(transactionGuid, false, block.timestamp);
             return VALIDATION_FAILED_NOT_RECEIVED;
@@ -178,10 +151,7 @@ contract SygmaValidateReceived is Ownable {
         }
 
         // Validate amount is sufficient
-        if (
-            receivedTx.amount < transaction.amount ||
-            receivedTx.amount < minimumAmount
-        ) {
+        if (receivedTx.amount < transaction.amount || receivedTx.amount < minimumAmount) {
             emit TransactionValidated(transactionGuid, false, block.timestamp);
             return VALIDATION_FAILED_INSUFFICIENT_AMOUNT;
         }
@@ -199,9 +169,7 @@ contract SygmaValidateReceived is Ownable {
     }
 
     // Enhanced validation with detailed checks
-    function validateReceivedDetailed(
-        SygmaTypes.SygmaTransaction memory transaction
-    )
+    function validateReceivedDetailed(SygmaTypes.SygmaTransaction memory transaction)
         public
         view
         returns (
@@ -216,18 +184,14 @@ contract SygmaValidateReceived is Ownable {
         )
     {
         bytes32 transactionGuid = transaction.transactionGuid;
-        ReceivedTransaction memory receivedTx = receivedTransactions[
-            transactionGuid
-        ];
+        ReceivedTransaction memory receivedTx = receivedTransactions[transactionGuid];
 
         exists = receivedTx.exists;
         isClaimed = receivedTx.isClaimed;
         isExpired = block.timestamp > receivedTx.timestamp + validationTimeout;
         recipientMatches = receivedTx.recipient == transaction.toAddress;
         tokenMatches = receivedTx.token == transaction.toToken;
-        amountSufficient =
-            receivedTx.amount >= transaction.amount &&
-            receivedTx.amount >= minimumAmount;
+        amountSufficient = receivedTx.amount >= transaction.amount && receivedTx.amount >= minimumAmount;
         chainMatches = receivedTx.sourceChain == transaction.sourceChain;
 
         // Determine validation result
@@ -251,30 +215,22 @@ contract SygmaValidateReceived is Ownable {
     }
 
     // Check if a transaction was received
-    function isTransactionReceived(
-        bytes32 transactionGuid
-    ) external view returns (bool) {
+    function isTransactionReceived(bytes32 transactionGuid) external view returns (bool) {
         return receivedTransactions[transactionGuid].exists;
     }
 
     // Check if a transaction was validated
-    function isTransactionValidated(
-        bytes32 transactionGuid
-    ) external view returns (bool) {
+    function isTransactionValidated(bytes32 transactionGuid) external view returns (bool) {
         return validatedTransactions[transactionGuid];
     }
 
     // Check if a transaction was claimed
-    function isTransactionClaimed(
-        bytes32 transactionGuid
-    ) external view returns (bool) {
+    function isTransactionClaimed(bytes32 transactionGuid) external view returns (bool) {
         return claimedTransactions[transactionGuid];
     }
 
     // Get received transaction details
-    function getReceivedTransaction(
-        bytes32 transactionGuid
-    ) external view returns (ReceivedTransaction memory) {
+    function getReceivedTransaction(bytes32 transactionGuid) external view returns (ReceivedTransaction memory) {
         return receivedTransactions[transactionGuid];
     }
 
@@ -297,33 +253,30 @@ contract SygmaValidateReceived is Ownable {
             isClaimed: false
         });
 
-        emit TransactionReceived(
-            transactionGuid,
-            recipient,
-            amount,
-            token,
-            sourceChain,
-            block.timestamp
-        );
+        emit TransactionReceived(transactionGuid, recipient, amount, token, sourceChain, block.timestamp);
     }
 
     // Get validation result description
-    function getValidationResultDescription(
-        uint256 result
-    ) external pure returns (string memory) {
-        if (result == VALIDATION_SUCCESS)
+    function getValidationResultDescription(uint256 result) external pure returns (string memory) {
+        if (result == VALIDATION_SUCCESS) {
             return "Transaction validated successfully";
-        if (result == VALIDATION_FAILED_NOT_RECEIVED)
+        }
+        if (result == VALIDATION_FAILED_NOT_RECEIVED) {
             return "Transaction not received";
-        if (result == VALIDATION_FAILED_INSUFFICIENT_AMOUNT)
+        }
+        if (result == VALIDATION_FAILED_INSUFFICIENT_AMOUNT) {
             return "Insufficient amount received";
-        if (result == VALIDATION_FAILED_WRONG_RECIPIENT)
+        }
+        if (result == VALIDATION_FAILED_WRONG_RECIPIENT) {
             return "Wrong recipient or chain";
-        if (result == VALIDATION_FAILED_WRONG_TOKEN)
+        }
+        if (result == VALIDATION_FAILED_WRONG_TOKEN) {
             return "Wrong token received";
+        }
         if (result == VALIDATION_FAILED_EXPIRED) return "Transaction expired";
-        if (result == VALIDATION_FAILED_ALREADY_CLAIMED)
+        if (result == VALIDATION_FAILED_ALREADY_CLAIMED) {
             return "Transaction already claimed";
+        }
         return "Unknown validation result";
     }
 }
