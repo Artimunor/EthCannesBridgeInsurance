@@ -98,13 +98,6 @@ contract SigmaClaimTest is TestHelperOz5 {
         assertEq(address(sygmaClaim.endpoint()), address(endpoints[bEid]));
         // Verify that READ_CHANNEL is correctly set
         assertEq(sygmaClaim.READ_CHANNEL(), DEFAULT_CHANNEL_ID);
-        // Verify that targetEid is correctly set
-        assertEq(sygmaClaim.targetEid(), aEid);
-        // Verify that targetContractAddress is correctly set
-        assertEq(
-            sygmaClaim.targetContractAddress(),
-            address(sygmaValidateReceive)
-        );
     }
 
     /**
@@ -131,7 +124,7 @@ contract SigmaClaimTest is TestHelperOz5 {
 
         // User A initiates the read request on bOApp
         vm.prank(userA);
-        sygmaClaim.readSum{value: fee.nativeFee}(a, b, options);
+        sygmaClaim.claim{value: fee.nativeFee}(a, b, options);
 
         // Simulate processing the response packet to bOApp on bEid, injecting the sum
         this.verifyPackets(

@@ -3,8 +3,8 @@ pragma solidity ^0.8.30;
 
 import {SygmaTypes} from "../SygmaTypes.sol";
 
-interface ISygmaValidateReceive {
-    function validateReceive(
+interface ISygmaValidateReceived {
+    function validateReceived(
         bytes32 transactionGuid,
         SygmaTypes.SygmaInsurance memory insurance
     ) external;

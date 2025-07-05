@@ -11,7 +11,7 @@ import {Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {OAppOptionsType3} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {ReadCodecV1, EVMCallRequestV1} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/ReadCodecV1.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ISygmaValidateReceive} from "./interface/ISygmaValidateReceive.sol";
+import {ISygmaValidateReceived} from "./interface/ISygmaValidateReceived.sol";
 
 contract SygmaClaim is OAppRead, OAppOptionsType3 {
     SygmaState public state;
@@ -35,21 +35,20 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
         _setPeer(_readChannel, AddressCast.toBytes32(address(this)));
     }
 
-    function claim(bytes32 transactionGuid) public {
+    function claim(bytes32 transactionGuid) external payable {
         SygmaTypes.SygmaInsurance memory insurance = state.getInsurance(
             transactionGuid
         );
         SygmaTypes.SygmaTransaction memory transaction = insurance.transaction;
 
         // Implement claim logic here
+        validateReceive(
+            address(insurance),
+            insurance.endpointId,
+            "",
+            transaction
+        );
     }
-
-    // ──────────────────────────────────────────────────────────────────────────────
-    // 0. (Optional) Quote business logic
-    //
-    // Example: Get a quote from the Endpoint for a cost estimate of reading data.
-    // Replace this to mirror your own read business logic.
-    // ──────────────────────────────────────────────────────────────────────────────
 
     /**
      * @notice Estimates the messaging fee required to perform the read operation.
@@ -63,26 +62,24 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
     function quoteReadFee(
         address _targetContractAddress,
         uint32 _targetEid,
-        bytes calldata _extraOptions
+        bytes calldata _extraOptions,
+        SygmaTypes.SygmaTransaction memory _transaction
     ) external view returns (MessagingFee memory fee) {
         return
             _quote(
                 READ_CHANNEL,
-                _getCmd(_targetContractAddress, _targetEid),
+                _getCmdValidateReceive(
+                    _targetContractAddress,
+                    _targetEid,
+                    _transaction
+                ),
                 combineOptions(READ_CHANNEL, READ_TYPE, _extraOptions),
                 false
             );
     }
 
-    // ──────────────────────────────────────────────────────────────────────────────
-    // 1a. Send business logic
-    //
-    // Example: send a read request to fetch data from a remote contract.
-    // Replace this with your own read request logic.
-    // ──────────────────────────────────────────────────────────────────────────────
-
     /**
-     * @notice Sends a read request to fetch the public state variable `data`.
+     * @notice Claim logic to read data from a target contract on a remote chain.
      *
      * @dev The caller must send enough ETH to cover the messaging fee.
      *
@@ -92,20 +89,19 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
      *
      * @return receipt The LayerZero messaging receipt for the request.
      */
-    function readData(
+    function validateReceive(
         address _targetContractAddress,
         uint32 _targetEid,
-        bytes calldata _extraOptions
-    ) external payable returns (MessagingReceipt memory receipt) {
+        bytes calldata _extraOptions,
+        SygmaTypes.SygmaTransaction memory _transaction
+    ) private payable returns (MessagingReceipt memory receipt) {
         // 1. Build the read command for the target contract and function
-        bytes memory cmd = _getCmd(_targetContractAddress, _targetEid);
+        bytes memory cmd = _getCmdValidateReceive(
+            _targetContractAddress,
+            _targetEid,
+            _transaction
+        );
 
-        // 2. Send the read request via LayerZero
-        //    - READ_CHANNEL: Special channel ID for read operations
-        //    - cmd: Encoded read command with target details
-        //    - combineOptions: Merge enforced options with caller-provided options
-        //    - MessagingFee(msg.value, 0): Pay all fees in native gas; no ZRO
-        //    - payable(msg.sender): Refund excess gas to caller
         return
             _lzSend(
                 READ_CHANNEL,
@@ -115,14 +111,6 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
                 payable(msg.sender)
             );
     }
-
-    // ──────────────────────────────────────────────────────────────────────────────
-    // 1b. Read command construction
-    //
-    // This function defines WHAT data to fetch from the target network and WHERE to fetch it from.
-    // This is the core of LayerZero Read - specifying exactly which contract function to call
-    // on which chain and how to handle the request.
-    // ──────────────────────────────────────────────────────────────────────────────
 
     /**
      * @notice Constructs the read command to fetch the `data` variable from target chain.
@@ -134,15 +122,17 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
      *
      * @return cmd The encoded command that specifies what data to read.
      */
-    function _getCmd(
+    function _getCmdValidateReceive(
         address _targetContractAddress,
-        uint32 _targetEid
+        uint32 _targetEid,
+        SygmaTypes.SygmaTransaction memory transaction
     ) internal view returns (bytes memory cmd) {
         // 1. Define WHAT function to call on the target contract
         //    Using the interface selector ensures type safety and correctness
         //    You can replace this with any public/external function or state variable
         bytes memory callData = abi.encodeWithSelector(
-            ISygmaValidateReceive.validateReceive.selector
+            ISygmaValidateReceived.validateReceived.selector,
+            transaction
         );
 
         // 2. Build the read request specifying WHERE and HOW to fetch the data
@@ -162,15 +152,6 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
         //    The appLabel (0) can be used to identify different types of read operations
         cmd = ReadCodecV1.encode(0, readRequests);
     }
-
-    // ──────────────────────────────────────────────────────────────────────────────
-    // 2. Receive business logic
-    //
-    // Override _lzReceive to handle the returned data from the read request.
-    // The base OAppReceiver.lzReceive ensures:
-    //   • Only the LayerZero Endpoint can call this method
-    //   • The sender is a registered peer (peers[srcEid] == origin.sender)
-    // ──────────────────────────────────────────────────────────────────────────────
 
     /**
      * @notice Handles the received data from the target chain.
@@ -198,12 +179,6 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
         // 3. (Optional) Apply your custom logic here.
         //    e.g., store the data, trigger additional actions, etc.
     }
-
-    // ──────────────────────────────────────────────────────────────────────────────
-    // 3. Admin functions
-    //
-    // Functions for managing the read channel configuration.
-    // ──────────────────────────────────────────────────────────────────────────────
 
     /**
      * @notice Sets the LayerZero read channel.
