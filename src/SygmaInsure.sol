@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {SygmaTypes} from "../lib/SygmaTypes.sol";
+import {SygmaTypes} from "./SygmaTypes.sol";
 import {SygmaState} from "./SygmaState.sol";
 
 contract SygmaInsure {
@@ -24,17 +24,23 @@ contract SygmaInsure {
         address toToken
     ) public {
         // Implement payment logic here, e.g., transfer premium from insuree to contract
+        SygmaTypes.SygmaTransaction memory transaction = SygmaTypes
+            .SygmaTransaction({
+                bridge: bridge,
+                transactionGuid: transactionGuid,
+                fromAddress: insuree,
+                toAddress: toAddress,
+                amount: usdAmount,
+                sourceChain: sourceChain,
+                destinationChain: toChain,
+                fromToken: fromToken,
+                toToken: toToken
+            });
 
         SygmaTypes.SygmaInsurance memory insurance = SygmaTypes.SygmaInsurance({
             usdAmount: usdAmount,
             premium: premium,
-            bridge: bridge,
-            insuree: insuree,
-            sourceChain: sourceChain,
-            toAddress: toAddress,
-            toChain: toChain,
-            fromToken: fromToken,
-            toToken: toToken
+            transaction: transaction
         });
 
         state.addInsurance(transactionGuid, insurance);
