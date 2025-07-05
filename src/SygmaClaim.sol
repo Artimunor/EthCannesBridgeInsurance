@@ -41,43 +41,36 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
         );
         SygmaTypes.SygmaTransaction memory transaction = insurance.transaction;
 
-        address destinationChainReceiverChecker = state.getChainReceiverChecker(
-            transaction.destinationChain
-        );
-
-        // Implement claim logic here
-        this.validateReceive(
-            destinationChainReceiverChecker,
-            transaction.destinationChain,
-            new bytes(0),
-            transaction
-        );
+        validateReceive(transaction.destinationChain, transaction);
     }
 
     /**
      * @notice Estimates the messaging fee required to perform the read operation.
      *
-     * @param _targetContractAddress The address of the contract on the target chain containing the `data` variable.
-     * @param _targetEid The target chain's Endpoint ID.
-     * @param _extraOptions Additional messaging options.
+     * @param _transactionGuid The transaction GUID for which to estimate the fee.
      *
      * @return fee The estimated messaging fee.
      */
     function quoteReadFee(
-        address _targetContractAddress,
-        uint32 _targetEid,
-        bytes calldata _extraOptions,
-        SygmaTypes.SygmaTransaction memory _transaction
-    ) external view returns (MessagingFee memory fee) {
+        bytes32 _transactionGuid
+    ) public view returns (MessagingFee memory fee) {
+        SygmaTypes.SygmaInsurance memory insurance = state.getInsurance(
+            _transactionGuid
+        );
+        SygmaTypes.SygmaTransaction memory transaction = insurance.transaction;
+
+        address destinationChainReceiverChecker = state.getChainReceiverChecker(
+            transaction.destinationChain
+        );
         return
             _quote(
                 READ_CHANNEL,
                 _getCmdValidateReceive(
-                    _targetContractAddress,
-                    _targetEid,
-                    _transaction
+                    destinationChainReceiverChecker,
+                    transaction.destinationChain,
+                    transaction
                 ),
-                combineOptions(READ_CHANNEL, READ_TYPE, _extraOptions),
+                this.combineOptions(READ_CHANNEL, READ_TYPE, new bytes(0)),
                 false
             );
     }
@@ -87,21 +80,20 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
      *
      * @dev The caller must send enough ETH to cover the messaging fee.
      *
-     * @param _targetContractAddress The address of the contract on the target chain containing the `data` variable.
      * @param _targetEid The target chain's Endpoint ID.
-     * @param _extraOptions Additional messaging options.
      *
      * @return receipt The LayerZero messaging receipt for the request.
      */
     function validateReceive(
-        address _targetContractAddress,
         uint32 _targetEid,
-        bytes calldata _extraOptions,
         SygmaTypes.SygmaTransaction memory _transaction
     ) public payable returns (MessagingReceipt memory receipt) {
-        // 1. Build the read command for the target contract and function
+        address destinationChainReceiverChecker = state.getChainReceiverChecker(
+            _transaction.destinationChain
+        );
+
         bytes memory cmd = _getCmdValidateReceive(
-            _targetContractAddress,
+            destinationChainReceiverChecker,
             _targetEid,
             _transaction
         );
@@ -110,7 +102,7 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
             _lzSend(
                 READ_CHANNEL,
                 cmd,
-                combineOptions(READ_CHANNEL, READ_TYPE, _extraOptions),
+                this.combineOptions(READ_CHANNEL, READ_TYPE, new bytes(0)),
                 MessagingFee(msg.value, 0),
                 payable(msg.sender)
             );

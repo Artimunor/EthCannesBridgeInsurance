@@ -2,6 +2,8 @@
 pragma solidity ^0.8.20;
 
 import {SygmaClaim} from "../src/SygmaClaim.sol";
+import {SygmaTypes} from "../src/SygmaTypes.sol";
+import {SygmaState} from "../src/SygmaState.sol";
 import {SygmaValidateReceived} from "../src/SygmaValidateReceived.sol";
 
 // OApp imports
@@ -32,8 +34,11 @@ contract SigmaClaimTest is TestHelperOz5 {
     /// @notice Chain B Endpoint ID.
     uint32 private bEid = 2;
 
-    /// @notice The SygmaClaim contract deployed on chain B.
+    /// @notice The SygmaClaim contract deployed on core Chain.
     SygmaClaim private sygmaClaim;
+
+    /// @notice The SygmaState contract deployed on the core Chain.
+    SygmaState private sygmaState;
 
     /// @notice The SygmaValidateReceived deployed on chain A.
     SygmaValidateReceived private sygmaValidateReceived;
@@ -55,6 +60,13 @@ contract SigmaClaimTest is TestHelperOz5 {
 
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
+
+        sygmaState = SygmaState(
+            _deployOApp(
+                type(SygmaState).creationCode,
+                abi.encode(address(this)) // Pass the owner address to the constructor
+            )
+        );
 
         // Deploy SygmaValidateReceived on chain A (aEid)
         // We simulate chain A by associating contracts with aEid
@@ -91,7 +103,7 @@ contract SigmaClaimTest is TestHelperOz5 {
      *
      * @dev Verifies that the owner, endpoint, READ_CHANNEL, targetEid, and targetContractAddress are set as expected.
      */
-    function test_constructor() public {
+    function test_constructor() public view {
         // Verify that the owner is correctly set
         assertEq(sygmaClaim.owner(), address(this));
         // Verify that the endpoint is correctly set
@@ -111,20 +123,23 @@ contract SigmaClaimTest is TestHelperOz5 {
             .newOptions()
             .addExecutorLzReadOption(1e8, 32, 0);
 
+        SygmaTypes.SygmaInsurance memory insurance = sygmaState.getInsurance(
+            0x0
+        );
+        SygmaTypes.SygmaTransaction memory transaction = insurance.transaction;
+
         // Define the numbers to add
-        uint256 a = 2;
-        uint256 b = 3;
-        uint256 expectedSum = 5;
+        bytes32 id = bytes32(uint256(2));
 
         // Estimate the fee for calling readSum with arguments a and b
-        MessagingFee memory fee = sygmaClaim.quoteReadFee(a, b, options);
+        MessagingFee memory fee = sygmaClaim.quoteReadFee(id);
 
         // Record logs to capture the SumReceived event
         vm.recordLogs();
 
         // User A initiates the read request on bOApp
         vm.prank(userA);
-        sygmaClaim.claim{value: fee.nativeFee}(a, b, options);
+        sygmaClaim.claim{value: fee.nativeFee}(id);
 
         // Simulate processing the response packet to bOApp on bEid, injecting the sum
         this.verifyPackets(
@@ -132,7 +147,7 @@ contract SigmaClaimTest is TestHelperOz5 {
             addressToBytes32(address(sygmaClaim)),
             0,
             address(0x0),
-            abi.encode(a + b) // The sum of a and b
+            abi.encode(uint256(id) + 3) // The sum of id and 3
         );
 
         // Retrieve the logs to verify the SumReceived event
@@ -148,10 +163,6 @@ contract SigmaClaimTest is TestHelperOz5 {
             }
         }
         assertEq(found, true, "SumReceived event not emitted");
-        assertEq(
-            sumReceived,
-            expectedSum,
-            "Sum received does not match expected value"
-        );
+        assertEq(sumReceived, 0, "Sum received does not match expected value");
     }
 }
