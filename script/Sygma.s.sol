@@ -10,7 +10,7 @@ import {ReadLibConfig} from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/r
 import {SygmaInsure} from "../src/SygmaInsure.sol";
 import {SygmaTypes} from "../src/SygmaTypes.sol";
 import {SygmaClaim} from "../src/SygmaClaim.sol";
-import {SygmaValidateReceive} from "../src/SygmaValidateReceive.sol";
+import {SygmaValidateReceived} from "../src/SygmaValidateReceived.sol";
 import {SygmaValidateSent} from "../src/SygmaValidateSent.sol";
 import {SygmaState} from "../src/SygmaState.sol";
 
@@ -18,7 +18,7 @@ contract SygmaScript is Script {
     using OptionsBuilder for bytes;
     SygmaInsure public insure;
     SygmaClaim public sygmaClaim;
-    SygmaValidateReceive public sygmaValidateReceive;
+    SygmaValidateReceived public sygmaValidateReceived;
     SygmaValidateSent public sygmaValidateSent;
     SygmaState public sygmaState;
 
@@ -79,7 +79,7 @@ contract SygmaScript is Script {
             READ_CHANNEL
         );
 
-        sygmaValidateReceive = new SygmaValidateReceive();
+        sygmaValidateReceived = new SygmaValidateReceived();
 
         sygmaValidateSent = new SygmaValidateSent();
 

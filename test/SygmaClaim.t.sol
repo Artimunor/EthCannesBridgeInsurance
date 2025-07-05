@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {SygmaClaim} from "../src/SygmaClaim.sol";
-import {SygmaValidateReceive} from "../src/SygmaValidateReceive.sol";
+import {SygmaValidateReceived} from "../src/SygmaValidateReceived.sol";
 
 // OApp imports
 import {IOAppOptionsType3, EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
@@ -35,8 +35,8 @@ contract SigmaClaimTest is TestHelperOz5 {
     /// @notice The SygmaClaim contract deployed on chain B.
     SygmaClaim private sygmaClaim;
 
-    /// @notice The SygmaValidateReceive deployed on chain A.
-    SygmaValidateReceive private sygmaValidateReceive;
+    /// @notice The SygmaValidateReceived deployed on chain A.
+    SygmaValidateReceived private sygmaValidateReceived;
 
     /// @notice Address representing User A.
     address private userA = address(0x1);
@@ -47,7 +47,7 @@ contract SigmaClaimTest is TestHelperOz5 {
     /**
      * @notice Sets up the test environment before each test.
      *
-     * @dev Deploys the SygmaValidateReceive on chain A and the SygmaClaim contract on chain B.
+     * @dev Deploys the SygmaValidateReceived on chain A and the SygmaClaim contract on chain B.
      *      Wires the OApps and sets up the endpoints.
      */
     function setUp() public virtual override {
@@ -56,12 +56,12 @@ contract SigmaClaimTest is TestHelperOz5 {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
-        // Deploy SygmaValidateReceive on chain A (aEid)
+        // Deploy SygmaValidateReceived on chain A (aEid)
         // We simulate chain A by associating contracts with aEid
-        sygmaValidateReceive = SygmaValidateReceive(
+        sygmaValidateReceived = SygmaValidateReceived(
             _deployOApp(
-                type(SygmaValidateReceive).creationCode,
-                abi.encode() // No constructor arguments needed for SygmaValidateReceive
+                type(SygmaValidateReceived).creationCode,
+                abi.encode() // No constructor arguments needed for SygmaValidateReceived
             )
         );
 
@@ -73,7 +73,7 @@ contract SigmaClaimTest is TestHelperOz5 {
                     address(endpoints[bEid]), // _endpoint (LayerZero endpoint on chain B)
                     DEFAULT_CHANNEL_ID, // _readChannel
                     aEid, // _targetEid (Endpoint ID of chain A)
-                    address(sygmaValidateReceive) // _targetContractAddress (ExampleContract on chain A)
+                    address(sygmaValidateReceived) // _targetContractAddress (ExampleContract on chain A)
                 )
             )
         );
