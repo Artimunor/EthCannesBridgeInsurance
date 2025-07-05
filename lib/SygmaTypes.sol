@@ -8,12 +8,26 @@ library SygmaTypes {
     struct SygmaInsurance {
         uint256 usdAmount;
         uint256 premium;
+        SygmaTransaction transaction;
+    }
+
+    struct SygmaTransaction {
         string bridge;
-        address insuree;
-        uint16 sourceChain;
+        bytes32 transactionGuid;
+        address fromAddress; // insuree's address
         address toAddress;
-        uint16 toChain;
+        uint256 amount;
+        uint16 sourceChain;
+        uint16 destinationChain;
         address fromToken;
         address toToken;
+    }
+
+    struct SygmaClaim {
+        bytes32 transactionGuid;
+        address claimer;
+        uint256 claimAmount;
+        uint256 claimTime;
+        bool isClaimed;
     }
 }
