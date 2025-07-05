@@ -23,6 +23,8 @@ contract SygmaInsure {
         address fromToken,
         address toToken
     ) public {
+        // Implement payment logic here, e.g., transfer premium from insuree to contract
+
         SygmaTypes.SygmaInsurance memory insurance = SygmaTypes.SygmaInsurance({
             usdAmount: usdAmount,
             premium: premium,
