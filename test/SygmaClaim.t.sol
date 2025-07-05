@@ -22,8 +22,8 @@ import "forge-std/Test.sol";
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 /**
- * @title ReadViewOrPureTest
- * @notice A test suite for the ReadViewOrPure contract.
+ * @title SigmaClaimTest
+ * @notice A test suite for the SigmaClaim contract.
  */
 contract SigmaClaimTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
