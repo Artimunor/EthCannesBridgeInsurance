@@ -2,34 +2,39 @@
 pragma solidity ^0.8.30;
 
 import {SygmaTypes} from "../lib/SygmaTypes.sol";
+import {SygmaState} from "./SygmaState.sol";
 
-contract Insure {
-    uint256 public number;
+contract SygmaInsure {
+    SygmaState public state;
 
-    mapping(bytes => SygmaTypes.SygmaInsurance) public insurance;
+    constructor(address _stateAddress) {
+        state = SygmaState(_stateAddress);
+    }
 
     function insure(
-        bytes memory id,
+        bytes32 transactionGuid,
         uint256 usdAmount,
         uint256 premium,
         string memory bridge,
         address insuree,
-        string memory sourceChain,
+        uint16 sourceChain,
         address toAddress,
-        string memory toChain,
+        uint16 toChain,
         address fromToken,
         address toToken
     ) public {
-        insurance[id] = SygmaTypes.SygmaInsurance({
+        SygmaTypes.SygmaInsurance memory insurance = SygmaTypes.SygmaInsurance({
             usdAmount: usdAmount,
             premium: premium,
             bridge: bridge,
             insuree: insuree,
             sourceChain: sourceChain,
-            toChain: toChain,
             toAddress: toAddress,
+            toChain: toChain,
             fromToken: fromToken,
             toToken: toToken
         });
+
+        state.addInsurance(transactionGuid, insurance);
     }
 }

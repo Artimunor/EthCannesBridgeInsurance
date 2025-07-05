@@ -10,9 +10,9 @@ library SygmaTypes {
         uint256 premium;
         string bridge;
         address insuree;
-        string sourceChain;
+        uint16 sourceChain;
         address toAddress;
-        string toChain;
+        uint16 toChain;
         address fromToken;
         address toToken;
     }

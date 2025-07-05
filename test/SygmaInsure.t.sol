@@ -2,13 +2,15 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Insure} from "../src/Insure.sol";
+import {SygmaInsure} from "../src/SygmaInsure.sol";
 
-contract InsureTest is Test {
-    Insure public insure;
+contract SygmaInsureTest is Test {
+    SygmaInsure public insure;
 
     function setUp() public {
-        insure = new Insure();
+        insure = new SygmaInsure(
+            address(0x1234567890123456789012345678901234567890) // Mock state address
+        );
     }
 
     function test_Insure() public {
