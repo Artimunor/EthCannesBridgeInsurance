@@ -12,8 +12,8 @@ import {OAppOptionsType3} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OApp
 import {ReadCodecV1, EVMCallRequestV1} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/ReadCodecV1.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract SygmaValidateSent {
-    function validateSent(
+contract SygmaValidateReceive {
+    function validateReceive(
         bytes32 transactionGuid,
         SygmaTypes.SygmaInsurance memory insurance
     ) public {
