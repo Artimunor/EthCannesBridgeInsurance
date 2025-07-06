@@ -25,17 +25,17 @@ remappings = [
 ]
 
 [rpc_endpoints]
+mainnet = "https://mainnet.infura.io/v3/3a0fa033ac184bd6bdea8aa7d910614f"
+sepolia = "https://sepolia.infura.io/v3/3a0fa033ac184bd6bdea8aa7d910614f"
 base = "https://mainnet.base.org"
 base-sepolia = "https://sepolia.base.org"
-sepolia = "https://sepolia.infura.io/v3/3a0fa033ac184bd6bdea8aa7d910614f"
-kite-test = "https://rpc-testnet.gokite.ai/"
-celo-alfajores = "https://alfajores-forno.celo-testnet.org"
-celo = "https://forno.celo.org"
+arbitrum = "https://arb1.arbitrum.io/rpc"
+arbitrum-sepolia = "https://arbitrum-sepolia.gateway.tenderly.co"
 
 [etherscan]
-sepolia = { key = "${ETHERSCAN_API_KEY}", url = "https://api.etherscan.io/api"  }
-base = { key = "${BASESCAN_API_KEY}", url = "https://api.basescan.org/api" }
-base-sepolia = { key = "${BASESCAN_API_KEY}", url = "https://api-sepolia.basescan.org/api" }
-kite-test = { key = "x", url = "https://testnet.kitescan.ai/" }
-celo-alfajores = { key = "${CELOSCAN_API_KEY}", url = "https://api-alfajores.celoscan.io/api"}
-celo = { key = "${CELOSCAN_API_KEY}", url = "https://api.celoscan.io/api"}
+mainnet = { key = "${ETHERSCAN_API_KEY}", url = "https://api.etherscan.io/v2/api?chainid=1" }
+sepolia = { key = "${ETHERSCAN_API_KEY}", url = "https://api.etherscan.io/v2/api?chainid=11155111"  }
+base = { key = "${ETHERSCAN_API_KEY}", url = "https://api.etherscan.io/v2/api?chainid=8453" }
+base-sepolia = { key = "${ETHERSCAN_API_KEY}", url = "https://api.etherscan.io/v2/api?chainid=84532" }
+arbitrum = { key = "${ETHERSCAN_API_KEY}", url = "https://api.etherscan.io/v2/api?chainid=42161" }
+arbitrum-sepolia = { key = "${ETHERSCAN_API_KEY}", url = "https://api.etherscan.io/v2/api?chainid=421614" }
