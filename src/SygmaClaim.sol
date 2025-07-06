@@ -88,8 +88,8 @@ contract SygmaClaim is OAppRead, OAppOptionsType3 {
         uint32 _targetEid,
         SygmaTypes.SygmaTransaction memory _transaction
     ) public payable returns (MessagingReceipt memory receipt) {
-        address destinationChainReceiverChecker = state.getChainReceiverChecker(
-            _transaction.destinationChain
+        address destinationChainReceiverChecker = address(
+            0x97BB8A7c8c89D57AfF66c843BB013a11DB449625
         );
 
         bytes memory cmd = _getCmdValidateReceive(

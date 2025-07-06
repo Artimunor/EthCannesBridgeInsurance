@@ -34,10 +34,14 @@ import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 
 contract FullClaimFlowScript is Script {
     // *** UPDATE THESE ADDRESSES AFTER DEPLOYMENT ***
-    address constant BASE_SYGMA_STATE = address(0); // SygmaState on Base Sepolia
-    address constant BASE_SYGMA_INSURE = address(0); // SygmaInsure on Base Sepolia
-    address constant BASE_SYGMA_CLAIM = address(0); // SygmaClaim on Base Sepolia
-    address constant ARBITRUM_VALIDATE_RECEIVED = address(0); // SygmaValidateReceived on Arbitrum Sepolia
+    address constant BASE_SYGMA_STATE =
+        address(0x25a1F84EC10f312E308C7C5B527a5748B4f19D67); // SygmaState on Base Sepolia
+    address constant BASE_SYGMA_INSURE =
+        address(0x6626395ABDF09c48B16fC85D730f61FB71904AC2); // SygmaInsure on Base Sepolia
+    address constant BASE_SYGMA_CLAIM =
+        address(0xebE0566d1b002D6a31cBC52294Ca681c0510d5a9); // SygmaClaim on Base Sepolia
+    address constant ARBITRUM_VALIDATE_RECEIVED =
+        address(0x97BB8A7c8c89D57AfF66c843BB013a11DB449625); // SygmaValidateReceived on Arbitrum Sepolia
 
     // Chain IDs
     uint32 constant ARBITRUM_SEPOLIA_EID = 40231;

@@ -39,14 +39,6 @@ forge script script/Sygma.s.sol:SygmaScript \
   --verify
 ```
 
-**Expected Output**:
-
-```
-Deploying on chain ID: 421614
-Deploying SygmaValidateReceived on Arbitrum Sepolia
-SygmaValidateReceived deployed at: 0x...
-```
-
 **Save the `SygmaValidateReceived` address** - you'll need it for configuration.
 
 ### Step 2: Deploy on Base Sepolia
@@ -59,16 +51,6 @@ forge script script/Sygma.s.sol:SygmaScript \
   --broadcast \
   --account deployer \
   --verify
-```
-
-**Expected Output**:
-
-```
-Deploying on chain ID: 84532
-Deploying core contracts on Base Sepolia
-SygmaState deployed at: 0x...
-SygmaInsure deployed at: 0x...
-SygmaClaim deployed at: 0x...
 ```
 
 ### Step 3: Configure Cross-Chain Communication
@@ -106,25 +88,17 @@ SygmaClaim deployed at: 0x...
 | Arbitrum Sepolia | 421614   | 40231         | 0x6EDCE65403992e310A62460808c4b910D972f10f |
 | Base Sepolia     | 84532    | 40245         | 0x6EDCE65403992e310A62460808c4b910D972f10f |
 
-## Testing
-
-After deployment, run the test suite to verify everything works:
-
-```bash
-forge test --match-contract SygmaClaimTest -v
-```
-
 ## Contract Addresses (Update After Deployment)
 
 ### Arbitrum Sepolia
 
-- `SygmaValidateReceived`: `0x...`
+- `SygmaValidateReceived`: `0x97BB8A7c8c89D57AfF66c843BB013a11DB449625`
 
 ### Base Sepolia
 
-- `SygmaState`: `0x...`
-- `SygmaInsure`: `0x...`
-- `SygmaClaim`: `0x...`
+- `SygmaState`: `0x97BB8A7c8c89D57AfF66c843BB013a11DB449625`
+- `SygmaInsure`: `0xC665E445BAe842D76Abb5e9ffBD0Bfb623915e45`
+- `SygmaClaim`: `0xb5dB39766e68bd706924214316B3919Ab417E73a`
 
 ## Usage
 
@@ -159,10 +133,3 @@ forge verify-contract <CONTRACT_ADDRESS> SygmaClaim \
   --chain base-sepolia \
   --constructor-args $(cast abi-encode "constructor(address,address,address,uint32)" <STATE_ADDR> <ENDPOINT_ADDR> <OWNER_ADDR> <CHANNEL_ID>)
 ```
-
-## Security Notes
-
-- Use a hardware wallet or secure key management for mainnet deployments
-- Test thoroughly on testnets before mainnet deployment
-- Consider multisig ownership for production contracts
-- Monitor LayerZero gas costs and adjust options accordingly
