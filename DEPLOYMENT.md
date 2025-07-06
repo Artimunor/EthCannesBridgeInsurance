@@ -14,7 +14,6 @@ This guide explains how to deploy the Sygma insurance system across Arbitrum Sep
    ```bash
    export ENDPOINT_ADDRESS="0x6EDCE65403992e310A62460808c4b910D972f10f"  # LayerZero endpoint (same for both chains)
    export OWNER_ADDRESS="<YOUR_WALLET_ADDRESS>"  # Contract owner address
-   export PRIVATE_KEY="<YOUR_PRIVATE_KEY>"       # Or use --wallet-dir for hardware wallets
    ```
 
 2. **RPC URLs**:
@@ -36,6 +35,7 @@ Deploy the validation contract:
 forge script script/Sygma.s.sol:SygmaScript \
   --rpc-url https://sepolia-rollup.arbitrum.io/rpc \
   --broadcast \
+  --account deployer \
   --verify
 ```
 
@@ -57,6 +57,7 @@ Deploy the core insurance contracts:
 forge script script/Sygma.s.sol:SygmaScript \
   --rpc-url https://sepolia.base.org \
   --broadcast \
+  --account deployer \
   --verify
 ```
 
@@ -86,6 +87,7 @@ SygmaClaim deployed at: 0x...
    ```bash
    forge script script/SygmaConfig.s.sol:SygmaConfigScript \
      --rpc-url https://sepolia.base.org \
+     --account deployer \
      --broadcast
    ```
 
@@ -93,6 +95,7 @@ SygmaClaim deployed at: 0x...
    ```bash
    forge script script/SygmaConfig.s.sol:SygmaConfigScript \
      --rpc-url https://sepolia.base.org \
+     --account deployer \
      --sig "verify()"
    ```
 

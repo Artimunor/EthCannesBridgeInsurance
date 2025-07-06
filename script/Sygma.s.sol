@@ -19,7 +19,6 @@ pragma solidity ^0.8.30;
  * Environment Variables Required:
  * - ENDPOINT_ADDRESS: LayerZero Endpoint address for the target chain
  * - OWNER_ADDRESS: Address that will own the contracts
- * - PRIVATE_KEY: Private key for deployment (use --wallet-dir for hardware wallets)
  *
  * Chain-specific endpoints:
  * - Arbitrum Sepolia: 0x6EDCE65403992e310A62460808c4b910D972f10f
